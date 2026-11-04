@@ -1,1 +1,90 @@
+# Lab: One Ticket, Two JSON Designs
 
+## 1. Referenced Design
+
+In this design, users, tickets, and events are stored in separate arrays and connected using IDs.
+
+```json
+{
+  "users": [
+    {
+      "user_id": 103,
+      "display_name": "Requester 103"
+    },
+    {
+      "user_id": 201,
+      "display_name": "Agent 201"
+    }
+  ],
+  "tickets": [
+    {
+      "ticket_id": 1003,
+      "subject": "Low water pressure",
+      "status": "resolved",
+      "requester_id": 103,
+      "assignee_id": 201
+    }
+  ],
+  "events": [
+    {
+      "event_id": 5005,
+      "ticket_id": 1003,
+      "event_type": "created",
+      "event_at": "2026-02-03T12:05:00Z"
+    },
+    {
+      "event_id": 5006,
+      "ticket_id": 1003,
+      "event_type": "status_changed",
+      "event_at": "2026-02-03T14:25:00Z"
+    },
+    {
+      "event_id": 5007,
+      "ticket_id": 1003,
+      "event_type": "status_changed",
+      "event_at": "2026-02-03T19:40:00Z"
+    }
+  ]
+}
+```
+
+## 2. Embedded or Hybrid Design
+
+In this design, the requester's information, assignee's information, and event history are stored directly inside the ticket document.
+
+```json
+{
+  "ticket_id": 1003,
+  "subject": "Low water pressure",
+  "status": "resolved",
+  "requester": {
+    "user_id": 103,
+    "display_name": "Requester 103"
+  },
+  "assignee": {
+    "user_id": 201,
+    "display_name": "Agent 201"
+  },
+  "events": [
+    {
+      "event_id": 5005,
+      "event_type": "created",
+      "event_at": "2026-02-03T12:05:00Z"
+    },
+    {
+      "event_id": 5006,
+      "event_type": "status_changed",
+      "event_at": "2026-02-03T14:25:00Z"
+    },
+    {
+      "event_id": 5007,
+      "event_type": "status_changed",
+      "event_at": "2026-02-03T19:40:00Z"
+    }
+  ]
+}
+```
+
+## 3. Explain One Tradeoff
+
+The referenced design makes it easier to keep users and tickets separate because the application uses IDs to find the requester's name and the ticket's events in different arrays. The embedded design makes opening a ticket easier because the requester's name and all three events are already stored inside the ticket document. However, if the requester changes their display name, the referenced design only requires updating their user record once, while the embedded design may require updating multiple ticket documents. Also, as a ticket collects more events over the years, the embedded events array could become too large. The referenced design avoids growing the ticket document because events are stored separately.
